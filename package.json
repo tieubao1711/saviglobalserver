@@ -1,0 +1,33 @@
+{
+  "name": "saviglobalserver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "pm2 start ecosystem.config.js --env production",
+    "start:dev": "pm2 start ecosystem.config.js --env development",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -w",
+    "serve": "node ./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.9.0",
+    "@types/node-cron": "^3.0.11",
+    "jsonwebtoken": "^9.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.8.2",
+    "node-cron": "^3.0.3"
+  }
+}
