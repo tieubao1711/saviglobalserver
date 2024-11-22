@@ -1,9 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import userRoutes from './routes/userRoutes';
+import cors from 'cors'; // Import cors
 import authRoutes from './routes/authRoutes';
-import { authenticate } from './middleware/authMiddleware';
 
 dotenv.config();
 
@@ -11,10 +10,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors()); // Bật CORS cho tất cả các nguồn
 app.use(express.json());
 
 // MongoDB Connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/saviglobal';
 
 mongoose
   .connect(MONGO_URI)

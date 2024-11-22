@@ -23,12 +23,25 @@ const router = express_1.default.Router();
 router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, password, fullName, idCard, phoneNumber, referralCode } = req.body;
+        // Kiểm tra dữ liệu đầu vào
+        if (!username || !password || !fullName || !idCard || !phoneNumber) {
+            res.status(201).json({ error: 'Vui lòng cung cấp đầy đủ thông tin đăng ký' });
+            return;
+        }
         // Kiểm tra tài khoản đã tồn tại
         const existingUser = yield User_1.default.findOne({ username });
         if (existingUser) {
-            res.status(400).json({ error: 'Tài khoản đã tồn tại' });
+            res.status(201).json({ error: 'Tài khoản đã tồn tại' });
             return;
         }
+        // Kiểm tra mã giới thiệu (nếu có)
+        // if (referralCode) {
+        //   const referrer = await User.findOne({ username: referralCode });
+        //   if (!referrer) {
+        //     res.status(400).json({ error: 'Mã giới thiệu không hợp lệ' });
+        //     return;
+        //   }
+        // }
         // Hash mật khẩu
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         // Tạo người dùng mới
@@ -53,9 +66,19 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
             balance: 0,
         }));
         yield Wallet_1.default.insertMany(wallets);
-        res.status(201).json({ message: 'Đăng ký thành công', user: { username, fullName, phoneNumber } });
+        // Trả về thông báo thành công
+        res.status(201).json({
+            message: 'Đăng ký thành công',
+            user: {
+                username,
+                fullName,
+                phoneNumber,
+                rank: newUser.rank,
+            },
+        });
     }
     catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Lỗi server, vui lòng thử lại sau.' });
     }
 }));
