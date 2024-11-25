@@ -23,7 +23,7 @@ app.use(session({
   }
 }));
 
-// Cho phép tất cả các nguồn
+// cors?
 app.use(cors());
 app.use(express.json());
 
