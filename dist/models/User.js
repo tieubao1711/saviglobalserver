@@ -29,7 +29,15 @@ const UserSchema = new mongoose_1.Schema({
     password: { type: String, required: true },
     fullName: { type: String, required: true },
     idCard: { type: String, required: true },
+    dateOfBirth: { type: Date }, // Ngày sinh
+    nationality: { type: String, default: 'Việt Nam' }, // Quốc gia
+    region: { type: String }, // Khu vực
+    gender: { type: String, enum: ['Nam', 'Nữ', 'Khác'], default: 'Khác' }, // Giới tính
     phoneNumber: { type: String, required: true },
+    companyPhone: { type: String }, // Số điện thoại công ty
+    homePhone: { type: String }, // Số điện thoại nhà riêng
+    email: { type: String }, // Email
+    address: { type: String }, // Địa chỉ
     referralCode: { type: String },
     uplineId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
     rank: { type: String, enum: ['Đồng', 'Bạc', 'Vàng', 'Bạch Kim', 'Kim Cương', 'Lãnh Đạo'], default: 'Đồng' },

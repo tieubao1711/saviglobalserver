@@ -3,11 +3,20 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors'; // Import cors
 import authRoutes from './routes/authRoutes';
+import captchaRoutes from './routes/captchaRoutes';
+import session from 'express-session';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(session({
+  secret: process.env.CAPTCHA_SECRET || 'captcha_secret', // Khóa bí mật
+  resave: false, // Không lưu lại session nếu không có thay đổi
+  saveUninitialized: true, // Lưu session ngay cả khi không có dữ liệu
+  cookie: { secure: false } // Đặt `true` nếu sử dụng HTTPS
+}));
 
 // Middleware
 app.use(cors()); // Bật CORS cho tất cả các nguồn
@@ -26,6 +35,7 @@ app.get('/', (req, res) => {
     res.send('Hello, TypeScript with MongoDB!');
 });
 
+app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
 
 // Start Server

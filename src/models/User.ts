@@ -5,7 +5,15 @@ export interface IUser extends Document {
   password: string; // Mật khẩu hash
   fullName: string; // Họ và tên
   idCard: string; // Căn cước công dân
+  dateOfBirth?: Date; // Ngày tháng năm sinh
+  nationality?: string; // Quốc gia
+  region?: string; // Khu vực
+  gender?: string; // Giới tính
   phoneNumber: string; // Số điện thoại
+  companyPhone?: string; // Số điện thoại công ty
+  homePhone?: string; // Số điện thoại nhà riêng
+  email?: string; // Email
+  address?: string; // Địa chỉ
   referralCode?: string; // Mã giới thiệu
   uplineId?: string; // ID tuyến trên
   rank: string; // Cấp bậc (Đồng, Bạc,...)
@@ -29,7 +37,15 @@ const UserSchema: Schema = new Schema(
     password: { type: String, required: true },
     fullName: { type: String, required: true },
     idCard: { type: String, required: true },
+    dateOfBirth: { type: Date }, // Ngày sinh
+    nationality: { type: String, default: 'Việt Nam' }, // Quốc gia
+    region: { type: String }, // Khu vực
+    gender: { type: String, enum: ['Nam', 'Nữ', 'Khác'], default: 'Khác' }, // Giới tính
     phoneNumber: { type: String, required: true },
+    companyPhone: { type: String }, // Số điện thoại công ty
+    homePhone: { type: String }, // Số điện thoại nhà riêng
+    email: { type: String }, // Email
+    address: { type: String }, // Địa chỉ
     referralCode: { type: String },
     uplineId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     rank: { type: String, enum: ['Đồng', 'Bạc', 'Vàng', 'Bạch Kim', 'Kim Cương', 'Lãnh Đạo'], default: 'Đồng' },

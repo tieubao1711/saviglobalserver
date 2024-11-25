@@ -13,15 +13,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const User_1 = __importDefault(require("../models/User"));
+const svg_captcha_1 = __importDefault(require("svg-captcha"));
 const router = express_1.default.Router();
-// Create a new user
-router.post('/users', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Generate a CAPTCHA
+router.get('/getCaptcha', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, email, password } = req.body;
-        const newUser = new User_1.default({ name, email, password });
-        yield newUser.save();
-        res.status(201).json(newUser);
+        // Create the CAPTCHA
+        const captcha = svg_captcha_1.default.create({
+            size: 6, // Number of characters
+            noise: 3, // Noise level
+            color: true, // Use colored text
+            background: '#f7f7f7', // Background color
+        });
+        // Save the CAPTCHA text in the session or other storage
+        req.session = req.session || {}; // Simulate session
+        req.session.captcha = captcha.text;
+        // Respond with the CAPTCHA SVG
+        res.type('svg');
+        res.status(200).send(captcha.data);
     }
     catch (err) {
         res.status(500).json({ error: err.message });
