@@ -3,13 +3,14 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors'; // Import cors
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import captchaRoutes from './routes/captchaRoutes';
 import session from 'express-session';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1711;
 
 app.use(session({
   secret: process.env.CAPTCHA_SECRET || 'captcha_secret', // Khóa bí mật
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 
 app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // Start Server
 app.listen(PORT, () => {
