@@ -1,11 +1,11 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import cors from 'cors'; // Import cors
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import captchaRoutes from './routes/captchaRoutes';
 import session from 'express-session';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -23,18 +23,8 @@ app.use(session({
   }
 }));
 
-
-// Middlewarea
-app.use(cors({
-  origin: (origin, callback) => {
-    // Cho phép tất cả các nguồn (hoặc xử lý logic kiểm tra origin nếu cần)
-    callback(null, true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức HTTP được phép
-  allowedHeaders: ['Content-Type', 'Authorization'], // Các header được phép
-  credentials: true // Cho phép gửi cookie và header `Authorization`
-}));
-
+// Cho phép tất cả các nguồn
+app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
