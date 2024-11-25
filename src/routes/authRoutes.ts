@@ -106,11 +106,11 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     const { username, password, captcha } = req.body;
 
     // Kiểm tra CAPTCHA
-    console.log((req as any).session?.captcha);
-    if (captcha !== (req as any).session?.captcha) {
-      res.status(400).json({ error: 'CAPTCHA không chính xác.' });
-      return;
-    }
+    // console.log((req as any).session?.captcha);
+    // if (captcha !== (req as any).session?.captcha) {
+    //   res.status(400).json({ error: 'CAPTCHA không chính xác.' });
+    //   return;
+    // }
 
     // Xóa CAPTCHA sau khi sử dụng
     (req as any).session.captcha = null;
