@@ -30,7 +30,6 @@ const ProductSchema = new mongoose_1.Schema({
     price: { type: Number, required: true }, // Giá sản phẩm
     description: { type: String }, // Mô tả sản phẩm (tùy chọn)
     imageUrl: { type: String, required: true }, // URL hình ảnh bắt buộc
-    pv: { type: Number, required: true }, // PV bắt buộc
     currency: { type: String, default: 'VND' }, // Đơn vị tiền tệ, mặc định là VND
 }, { timestamps: true } // Tự động thêm createdAt và updatedAt
 );

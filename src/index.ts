@@ -13,15 +13,23 @@ const app = express();
 const PORT = process.env.PORT || 1711;
 
 app.use(session({
-  secret: process.env.CAPTCHA_SECRET || 'captcha_secret', // Khóa bí mật
-  resave: false, // Không lưu lại session nếu không có thay đổi
-  saveUninitialized: true, // Lưu session ngay cả khi không có dữ liệu
-  cookie: { secure: false } // Đặt `true` nếu sử dụng HTTPS
+  secret: process.env.CAPTCHA_SECRET || 'captcha_secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: false, // Đặt `true` nếu sử dụng HTTPS
+    httpOnly: false, // Cho phép truy cập từ phía client
+    sameSite: 'lax' // Hoặc 'none' nếu sử dụng HTTPS
+  }
 }));
+
 
 // Middlewarea
 app.use(cors({
-  origin: 'http://localhost:3000', // Chỉ cho phép localhost:3000
+  origin: (origin, callback) => {
+    // Cho phép tất cả các nguồn (hoặc xử lý logic kiểm tra origin nếu cần)
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức HTTP được phép
   allowedHeaders: ['Content-Type', 'Authorization'], // Các header được phép
   credentials: true // Cho phép gửi cookie và header `Authorization`

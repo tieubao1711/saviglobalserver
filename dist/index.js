@@ -8,19 +8,32 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors")); // Import cors
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const captchaRoutes_1 = __importDefault(require("./routes/captchaRoutes"));
 const express_session_1 = __importDefault(require("express-session"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1711;
 app.use((0, express_session_1.default)({
-    secret: process.env.CAPTCHA_SECRET || 'captcha_secret', // Khóa bí mật
-    resave: false, // Không lưu lại session nếu không có thay đổi
-    saveUninitialized: true, // Lưu session ngay cả khi không có dữ liệu
-    cookie: { secure: false } // Đặt `true` nếu sử dụng HTTPS
+    secret: process.env.CAPTCHA_SECRET || 'captcha_secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: false, // Đặt `true` nếu sử dụng HTTPS
+        httpOnly: false, // Cho phép truy cập từ phía client
+        sameSite: 'lax' // Hoặc 'none' nếu sử dụng HTTPS
+    }
 }));
-// Middleware
-app.use((0, cors_1.default)()); // Bật CORS cho tất cả các nguồn
+// Middlewarea
+app.use((0, cors_1.default)({
+    origin: (origin, callback) => {
+        // Cho phép tất cả các nguồn (hoặc xử lý logic kiểm tra origin nếu cần)
+        callback(null, true);
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức HTTP được phép
+    allowedHeaders: ['Content-Type', 'Authorization'], // Các header được phép
+    credentials: true // Cho phép gửi cookie và header `Authorization`
+}));
 app.use(express_1.default.json());
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/saviglobal';
@@ -34,6 +47,7 @@ app.get('/', (req, res) => {
 });
 app.use('/api', captchaRoutes_1.default);
 app.use('/api/auth', authRoutes_1.default);
+app.use('/api/users', userRoutes_1.default);
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
