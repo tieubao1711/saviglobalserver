@@ -19,8 +19,14 @@ app.use(session({
   cookie: { secure: false } // Đặt `true` nếu sử dụng HTTPS
 }));
 
-// Middleware
-app.use(cors()); // Bật CORS cho tất cả các nguồn
+// Middlewarea
+app.use(cors({
+  origin: 'http://localhost:3000', // Chỉ cho phép localhost:3000
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức HTTP được phép
+  allowedHeaders: ['Content-Type', 'Authorization'], // Các header được phép
+  credentials: true // Cho phép gửi cookie và header `Authorization`
+}));
+
 app.use(express.json());
 
 // MongoDB Connection

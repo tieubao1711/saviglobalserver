@@ -50,4 +50,6 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
   }
 });
 
+
+
 export default router;
