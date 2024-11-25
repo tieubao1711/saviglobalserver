@@ -24,7 +24,7 @@ app.use((0, express_session_1.default)({
         sameSite: 'lax' // Hoặc 'none' nếu sử dụng HTTPS
     }
 }));
-// Cho phép tất cả các nguồn
+// cors?
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // MongoDB Connection

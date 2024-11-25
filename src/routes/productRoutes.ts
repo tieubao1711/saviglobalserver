@@ -4,7 +4,7 @@ import Product from '../models/Product';
 const router = express.Router();
 
 // Lấy danh sách sản phẩm
-router.get('/products', async (req: Request, res: Response): Promise<void> => {
+router.get('/list', async (req: Request, res: Response): Promise<void> => {
   try {
     // Lấy danh sách tất cả sản phẩm từ MongoDB
     const products = await Product.find();

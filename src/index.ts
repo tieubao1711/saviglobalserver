@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import productRoutes from './routes/productRoutes';
 import captchaRoutes from './routes/captchaRoutes';
 import session from 'express-session';
 import cors from 'cors';
@@ -43,6 +44,7 @@ app.get('/', (req, res) => {
 app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
 
 // Start Server
 app.listen(PORT, () => {
