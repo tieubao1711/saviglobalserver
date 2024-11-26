@@ -20,10 +20,10 @@ router.get('/getCaptcha', (req, res) => __awaiter(void 0, void 0, void 0, functi
     try {
         // Create the CAPTCHA
         const captcha = svg_captcha_1.default.create({
-            size: 6, // Number of characters
-            noise: 3, // Noise level
-            color: true, // Use colored text
-            background: '#f7f7f7', // Background color
+            size: 5,
+            charPreset: '0123456789', // Chỉ sử dụng số
+            noise: 0,
+            color: false,
         });
         // Save the CAPTCHA text in the session or other storage
         req.session = req.session || {}; // Simulate session

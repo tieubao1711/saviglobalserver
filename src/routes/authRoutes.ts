@@ -30,15 +30,12 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       dateOfBirth,
       nationality,
       region,
-      gender,
-      companyPhone,
-      homePhone,
       email,
       address,
     } = req.body;
 
     // Kiểm tra dữ liệu đầu vào
-    if (!username || !password || !fullName || !idCard || !phoneNumber) {
+    if (!username || !password || !fullName || !idCard || !phoneNumber || !email) {
       res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ thông tin đăng ký' });
       return;
     }
@@ -64,9 +61,6 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined, // Chuyển đổi sang Date nếu có
       nationality,
       region,
-      gender,
-      companyPhone,
-      homePhone,
       email,
       address,
       rank: 'Đồng', // Mặc định cấp bậc là Đồng
@@ -103,7 +97,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 // API Đăng nhập
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password, captcha } = req.body;
+    const { identifier, password, captcha } = req.body; // Sử dụng "identifier" thay vì "username"
 
     // Kiểm tra CAPTCHA
     // console.log((req as any).session?.captcha);
@@ -115,8 +109,15 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     // Xóa CAPTCHA sau khi sử dụng
     (req as any).session.captcha = null;
 
-    // Kiểm tra tài khoản
-    const user = await User.findOne({ username });
+    // Kiểm tra tài khoản qua username, email hoặc phoneNumber
+    const user = await User.findOne({
+      $or: [
+        { username: identifier },
+        { email: identifier },
+        { phoneNumber: identifier },
+      ],
+    });
+
     if (!user) {
       res.status(400).json({ error: 'Tài khoản không tồn tại.' });
       return;

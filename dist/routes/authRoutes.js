@@ -21,7 +21,7 @@ const router = express_1.default.Router();
 // API Đăng ký thành viên
 router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, fullName, idCard, phoneNumber, referralCode, dateOfBirth, nationality, region, gender, companyPhone, homePhone, email, address, } = req.body;
+        const { username, password, fullName, idCard, phoneNumber, referralCode, dateOfBirth, nationality, region, gender, homePhone, email, address, } = req.body;
         // Kiểm tra dữ liệu đầu vào
         if (!username || !password || !fullName || !idCard || !phoneNumber) {
             res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ thông tin đăng ký' });
@@ -46,8 +46,6 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
             dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined, // Chuyển đổi sang Date nếu có
             nationality,
             region,
-            gender,
-            companyPhone,
             homePhone,
             email,
             address,
@@ -82,15 +80,14 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
 }));
 // API Đăng nhập
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     try {
         const { username, password, captcha } = req.body;
         // Kiểm tra CAPTCHA
-        console.log((_a = req.session) === null || _a === void 0 ? void 0 : _a.captcha);
-        if (captcha !== ((_b = req.session) === null || _b === void 0 ? void 0 : _b.captcha)) {
-            res.status(400).json({ error: 'CAPTCHA không chính xác.' });
-            return;
-        }
+        // console.log((req as any).session?.captcha);
+        // if (captcha !== (req as any).session?.captcha) {
+        //   res.status(400).json({ error: 'CAPTCHA không chính xác.' });
+        //   return;
+        // }
         // Xóa CAPTCHA sau khi sử dụng
         req.session.captcha = null;
         // Kiểm tra tài khoản

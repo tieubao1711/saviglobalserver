@@ -16,11 +16,9 @@ const express_1 = __importDefault(require("express"));
 const Product_1 = __importDefault(require("../models/Product"));
 const router = express_1.default.Router();
 // Lấy danh sách sản phẩm
-router.get('/products', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/list', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Lấy danh sách tất cả sản phẩm từ MongoDB
         const products = yield Product_1.default.find();
-        // Trả về danh sách sản phẩm
         res.status(200).json({
             status: 'success',
             data: products,
@@ -30,6 +28,83 @@ router.get('/products', (req, res) => __awaiter(void 0, void 0, void 0, function
         res.status(500).json({
             status: 'error',
             message: 'Lỗi server, vui lòng thử lại sau.',
+        });
+    }
+}));
+// Thêm sản phẩm
+router.post('/add', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { name, code, price, description, imageUrl, currency } = req.body;
+        // Tạo sản phẩm mới
+        const newProduct = new Product_1.default({
+            name,
+            code,
+            price,
+            description,
+            imageUrl,
+            currency,
+        });
+        yield newProduct.save();
+        res.status(201).json({
+            status: 'success',
+            data: newProduct,
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Lỗi server, không thể thêm sản phẩm.',
+        });
+    }
+}));
+// Sửa sản phẩm
+router.put('/update/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        // Cập nhật sản phẩm
+        const updatedProduct = yield Product_1.default.findByIdAndUpdate(id, updates, { new: true });
+        if (!updatedProduct) {
+            res.status(404).json({
+                status: 'error',
+                message: 'Sản phẩm không tồn tại.',
+            });
+            return;
+        }
+        res.status(200).json({
+            status: 'success',
+            data: updatedProduct,
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Lỗi server, không thể cập nhật sản phẩm.',
+        });
+    }
+}));
+// Xóa sản phẩm
+router.delete('/delete/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        // Xóa sản phẩm
+        const deletedProduct = yield Product_1.default.findByIdAndDelete(id);
+        if (!deletedProduct) {
+            res.status(404).json({
+                status: 'error',
+                message: 'Sản phẩm không tồn tại.',
+            });
+            return;
+        }
+        res.status(200).json({
+            status: 'success',
+            message: 'Sản phẩm đã được xóa.',
+        });
+    }
+    catch (err) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Lỗi server, không thể xóa sản phẩm.',
         });
     }
 }));

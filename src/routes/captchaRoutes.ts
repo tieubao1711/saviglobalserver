@@ -8,10 +8,10 @@ router.get('/getCaptcha', async (req, res) => {
   try {
     // Create the CAPTCHA
     const captcha = svgCaptcha.create({
-      size: 6, // Number of characters
-      noise: 3, // Noise level
-      color: true, // Use colored text
-      background: '#f7f7f7', // Background color
+      size: 5,
+      charPreset: '0123456789', // Chỉ sử dụng số
+      noise: 0,
+      color: false,
     });
 
     // Save the CAPTCHA text in the session or other storage
