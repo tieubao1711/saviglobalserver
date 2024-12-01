@@ -160,7 +160,8 @@ async function completeBinaryTree(nodes: IBinaryTree[]) {
 
 // Tạo Cron Job
 export function setupCronJob() {
-  schedule.scheduleJob('*/10 * * * * *', async () => {
+  // Chạy mỗi 10 phút
+  schedule.scheduleJob('*/10 * * * *', async () => {
     try {
       console.log('Running profit distribution test...');
       await distributeProfit(); // Gọi hàm phân phối lợi nhuận
