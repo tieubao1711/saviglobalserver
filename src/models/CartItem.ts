@@ -1,39 +1,49 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-// Import Product Interface
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IProduct } from './Product';
 
 export interface ICartItem extends Document {
-  product: IProduct; // Tham chiếu đến sản phẩm (Product)
-  quantity: number; // Số lượng sản phẩm trong giỏ
-  totalPrice: number; // Tổng giá trị (price * quantity)
-  totalPv: number; // Tổng PV (pv * quantity)
+  productId: Types.ObjectId; // Sử dụng Types.ObjectId
+  quantity: number;
+  totalPrice: number;
 }
 
 export interface ICart extends Document {
-  userId: mongoose.Schema.Types.ObjectId; // ID người dùng sở hữu giỏ hàng
-  items: ICartItem[]; // Danh sách sản phẩm trong giỏ hàng
-  totalTransactions: number; // Tổng số giao dịch (số sản phẩm khác nhau trong giỏ)
+  userId: Types.ObjectId; // Sử dụng Types.ObjectId
+  items: ICartItem[];
+  totalTransactions: number;
+  totalPrice: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ICartPopulatedItem {
+  productId: IProduct; // Sau khi populate, productId sẽ là IProduct
+  quantity: number;
+  totalPrice: number;
+}
+
+// Định nghĩa ICartPopulated (giỏ hàng sau populate)
+export interface ICartPopulated extends Document {
+  userId: Types.ObjectId; // ID người dùng
+  items: ICartPopulatedItem[]; // Danh sách mục trong giỏ (đã populate)
+  totalTransactions: number; // Tổng giao dịch
   totalPrice: number; // Tổng giá trị đơn hàng
-  totalPv: number; // Tổng PV
-  createdAt: Date; // Ngày tạo giỏ hàng
-  updatedAt: Date; // Ngày cập nhật giỏ hàng
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const CartItemSchema: Schema = new Schema({
-  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true }, // Tham chiếu Product
+  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true }, // Tham chiếu Product ID
   quantity: { type: Number, required: true },
-  totalPrice: { type: Number, required: true }, // Sẽ được tính khi thêm sản phẩm vào giỏ
-  totalPv: { type: Number, required: true }, // Sẽ được tính khi thêm sản phẩm vào giỏ
+  totalPrice: { type: Number, required: true },
 });
 
 const CartSchema: Schema = new Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    items: [CartItemSchema], // Danh sách sản phẩm
-    totalTransactions: { type: Number, default: 0 }, // Tổng giao dịch
-    totalPrice: { type: Number, default: 0 }, // Tổng số tiền
-    totalPv: { type: Number, default: 0 }, // Tổng PV
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    items: [CartItemSchema],
+    totalTransactions: { type: Number, default: 0 },
+    totalPrice: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

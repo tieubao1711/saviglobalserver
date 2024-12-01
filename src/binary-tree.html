@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Tree</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    .tree {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .tree-level {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .node {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: #f4f4f4;
+      border-radius: 5px;
+    }
+    .node:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Binary Tree</h1>
+  <div id="tree" class="tree">Loading...</div>
+
+  <script>
+    async function fetchTree() {
+      try {
+        const response = await fetch('https://saviglobal.xyz/api/binary-tree');
+        if (!response.ok) {
+          throw new Error('Failed to fetch binary tree');
+        }
+        const data = await response.json();
+        renderTree(data);
+      } catch (error) {
+        console.error('Error fetching tree:', error);
+        document.getElementById('tree').innerText = 'Failed to load tree';
+      }
+    }
+
+    function renderTree(data) {
+      const treeContainer = document.getElementById('tree');
+      treeContainer.innerHTML = ''; // Clear existing content
+
+      const levels = groupByDepth(data);
+
+      levels.forEach(level => {
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'tree-level';
+
+        level.forEach(node => {
+          const nodeDiv = document.createElement('div');
+          nodeDiv.className = 'node';
+          nodeDiv.innerHTML = `
+            <strong>${node.user?.username || 'Empty'}</strong>
+            <br>
+            ${node.user?.globalWallet || 0} VND
+          `;
+          levelDiv.appendChild(nodeDiv);
+        });
+
+        treeContainer.appendChild(levelDiv);
+      });
+    }
+
+    function groupByDepth(data) {
+      const levels = {};
+      data.forEach(node => {
+        if (!levels[node.depth]) levels[node.depth] = [];
+        levels[node.depth].push(node);
+      });
+      return Object.values(levels);
+    }
+
+    fetchTree();
+  </script>
+</body>
+</html>

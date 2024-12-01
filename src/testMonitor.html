@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profit Distribution Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    table th {
+      background-color: #f4f4f4;
+    }
+    .details-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .details-btn:hover {
+      background-color: #45a049;
+    }
+    .summary {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Profit Distribution Monitor</h1>
+  <h3>Updated every 10 minutes</h3>
+  <div id="summary" class="summary">Total Daily Profit: Loading...</div>
+  <table>
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>Username</th>
+        <th>Balance</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody id="data">
+      <!-- Dữ liệu sẽ được thêm tại đây -->
+    </tbody>
+  </table>
+  <script>
+    async function fetchTotalProfit() {
+      try {
+        const response = await fetch('https://saviglobal.xyz/api/total-profit'); // API mới
+        if (!response.ok) {
+          throw new Error('Failed to fetch total profit');
+        }
+        const { profit } = await response.json();
+        const summaryDiv = document.getElementById('summary');
+        summaryDiv.textContent = `Total Daily Profit: ${profit.toLocaleString()} VND`;
+      } catch (error) {
+        console.error('Error fetching total profit:', error);
+      }
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch('https://saviglobal.xyz/api/test-data'); // Route API
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+
+        const tableBody = document.getElementById('data');
+        tableBody.innerHTML = ''; // Xóa dữ liệu cũ
+
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.userId}</td>
+            <td>${item.username}</td>
+            <td>${item.balance}</td>
+            <td>
+              <button class="details-btn" onclick="viewDetails('${item.userId}')">Details</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    function viewDetails(userId) {
+      window.location.href = `details.html?userId=${userId}`;
+    }
+
+    // Tự động cập nhật mỗi 10 phút
+    setInterval(() => {
+      fetchData();
+      fetchTotalProfit();
+    }, 10 * 60 * 1000);
+
+    // Gọi lần đầu khi tải trang
+    fetchData();
+    fetchTotalProfit();
+  </script>
+</body>
+</html>
