@@ -5,7 +5,7 @@ import cors from 'cors';
 import binaryTree from './routes/binaryTreeRoutes';
 
 const app = express();
-const PORT = 3000;
+const PORT = 1711;
 
 // Kết nối MongoDB trước khi khởi động server
 async function startServer() {
