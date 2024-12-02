@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { BinaryTree } from '../models/BinaryTree';
 import mongoose from 'mongoose';
+import User from '../models/User';
+import { authenticate } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
@@ -42,17 +44,61 @@ router.get('/', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/members', async (req: Request, res: Response) => {
-  const { parentId } = req.query;
-
+router.get('/members', authenticate, async (req: Request, res: Response) => {
   try {
-    if (!parentId || !mongoose.Types.ObjectId.isValid(parentId as string)) {
-      res.status(400).json({ status: 'error', message: 'Invalid or missing parentId' });
+    const userId = (req as any).user.id;
+
+    // Tìm thông tin người dùng
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ status: 'error', message: 'Người dùng không tồn tại.' });
       return;
     }
 
-    // Tìm tất cả các node con có parentId là ID được cung cấp
-    const childNodes = await BinaryTree.find({ parentId })
+    // Hàm đệ quy để tìm tất cả các thành viên cấp dưới
+    const fetchMembersRecursively = async (parentId: string): Promise<any[]> => {
+      const childNodes = await BinaryTree.find({ parentId })
+        .populate({
+          path: 'pointId',
+          model: 'Point',
+          populate: {
+            path: 'userId',
+            model: 'User',
+          },
+        })
+        .lean();
+
+      const members = [];
+
+      for (const node of childNodes) {
+        const member = {
+          id: node._id,
+          parentId: node.parentId,
+          leftChildId: node.leftChildId,
+          rightChildId: node.rightChildId,
+          depth: node.depth,
+          user: node.pointId && (node.pointId as any).userId
+            ? {
+                id: (node.pointId as any).userId._id,
+                username: (node.pointId as any).userId.username,
+                globalWallet: (node.pointId as any).userId.wallets.globalWallet,
+              }
+            : null,
+        };
+
+        // Thêm thành viên hiện tại
+        members.push(member);
+
+        // Đệ quy tìm cấp dưới
+        const subMembers = await fetchMembersRecursively(member.id.toString());
+        members.push(...subMembers);
+      }
+
+      return members;
+    };
+
+    // Bắt đầu từ chính bản thân người dùng
+    const rootNode = await BinaryTree.findOne({ pointId: { $exists: true, $eq: userId } })
       .populate({
         path: 'pointId',
         model: 'Point',
@@ -63,21 +109,29 @@ router.get('/members', async (req: Request, res: Response) => {
       })
       .lean();
 
-    // Chuẩn bị dữ liệu trả về
-    const members = childNodes.map(node => ({
-      id: node._id,
-      parentId: node.parentId,
-      leftChildId: node.leftChildId,
-      rightChildId: node.rightChildId,
-      depth: node.depth,
-      user: node.pointId && (node.pointId as any).userId
-        ? {
-            id: (node.pointId as any).userId._id,
-            username: (node.pointId as any).userId.username,
-            globalWallet: (node.pointId as any).userId.wallets.globalWallet,
-          }
-        : null,
-    }));
+    const members = [];
+    if (rootNode) {
+      const self = {
+        id: rootNode._id,
+        parentId: rootNode.parentId,
+        leftChildId: rootNode.leftChildId,
+        rightChildId: rootNode.rightChildId,
+        depth: rootNode.depth,
+        user: rootNode.pointId && (rootNode.pointId as any).userId
+          ? {
+              id: (rootNode.pointId as any).userId._id,
+              username: (rootNode.pointId as any).userId.username,
+              globalWallet: (rootNode.pointId as any).userId.wallets.globalWallet,
+            }
+          : null,
+      };
+
+      members.push(self);
+
+      // Thêm tất cả các cấp dưới
+      const subMembers = await fetchMembersRecursively(rootNode._id.toString());
+      members.push(...subMembers);
+    }
 
     res.status(200).json({ status: 'success', data: members });
   } catch (error) {
