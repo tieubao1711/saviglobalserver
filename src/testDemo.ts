@@ -6,6 +6,7 @@ import { BinaryTree, IBinaryTree } from './models/BinaryTree';
 import { distributeProfit } from './services/profit/distributeProfit';
 import User from './models/User';
 import { Order } from './models/Order';
+import bcrypt from 'bcrypt';
 
 // Kết nối MongoDB
 export async function connectDB() {
@@ -30,12 +31,12 @@ export async function generateFakeData() {
 
     console.log('Generating fake data...');
     const binaryTreeNodes = [];
-
+    const hashedPassword = await bcrypt.hash('123123a', 10);
     for (let i = 1; i <= 100; i++) {
       // Tạo User
       const user = await User.create({
         username: `user${i}`,
-        password: '123123a',
+        password: hashedPassword,
         fullName: `User FullName ${i}`,
         idCard: `IDCard${i}`,
         dateOfBirth: new Date(1990, 0, i % 30 + 1),
