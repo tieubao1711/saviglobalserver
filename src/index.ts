@@ -46,13 +46,13 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', testRoutes);
-app.use('/api', binaryTree);
 
+app.use('/api', cartRoutes);
 app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api', cartRoutes);
+app.use('/api/binary-tree', binaryTree);
 
 // Start Server
 app.listen(PORT, () => {
