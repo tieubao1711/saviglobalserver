@@ -9,7 +9,9 @@ import cartRoutes from './routes/cartRoutes';
 import session from 'express-session';
 import cors from 'cors';
 import testRoutes from './routes/testRoutes'; // Import test routes
-import binaryTree from './routes/binaryTreeRoutes';
+import binaryTreeRoutes from './routes/binaryTreeRoutes';
+import adminRoutes from './routes/adminRoutes';
+import initData from './configs/initdata';
 
 dotenv.config();
 
@@ -45,6 +47,8 @@ app.get('/', (req, res) => {
     res.send('Hello, TypeScript with MongoDB!');
 });
 
+app.use('/api/admin', adminRoutes);
+
 app.use('/api', testRoutes);
 
 app.use('/api', cartRoutes);
@@ -52,9 +56,12 @@ app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/binary-tree', binaryTree);
+app.use('/api/binary-tree', binaryTreeRoutes);
 
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// initialize base data
+initData();

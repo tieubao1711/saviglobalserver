@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Product, { IProduct } from '../models/Product';
 import { Cart, ICartPopulatedItem } from '../models/CartItem';
 import { authenticate } from '../middlewares/authMiddleware';
+import { Order } from '../models/Order';
 
 const router = express.Router();
 
@@ -123,24 +124,19 @@ router.post('/carts/checkout', authenticate, async (req: Request, res: Response)
             return;
         }
 
-        const order = {
-            orderId: new mongoose.Types.ObjectId().toString(),
-            userId,
-            items: cart.items,
-            totalPrice: cart.totalPrice,
-            paymentMethod,
-            address,
-            createdAt: new Date(),
-        };
-
         cart.items = [];
         cart.totalTransactions = 0;
         cart.totalPrice = 0;
         await cart.save();
 
-        // Giả định rằng bạn sẽ lưu `order` vào collection "Order" (chưa được triển khai)
+        const order = await Order.create({
+            userId: userId,
+            items: cart.items,
+            totalPrice: cart.totalPrice,
+            status: 'Completed',
+        });
 
-        res.json({ status: 'success', message: 'Order placed successfully', orderId: order.orderId });
+        res.json({ status: 'success', message: 'Order placed successfully', orderId: order._id });
     } catch (error) {
         console.error(error);
         res.status(500).json({ status: 'error', message: 'Internal server error' });

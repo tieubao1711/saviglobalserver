@@ -3,6 +3,7 @@ import { BinaryTree } from '../models/BinaryTree';
 import mongoose from 'mongoose';
 import User from '../models/User';
 import { authenticate } from '../middlewares/authMiddleware';
+import { Point } from '../models/Point';
 
 const router = express.Router();
 
@@ -44,7 +45,7 @@ router.get('/', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/members', async (req: Request, res: Response) => {
+router.get('/members', authenticate, async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id; // Lấy userId từ middleware authenticate
 
@@ -53,8 +54,33 @@ router.get('/members', async (req: Request, res: Response) => {
       return;
     }
 
-    // Hàm đệ quy để lấy tất cả các thành viên cấp dưới
-    const fetchMembersRecursively = async (parentId: string): Promise<any[]> => {
+    // Tìm `Point` chứa `userId`
+    const point = await Point.findOne({ userId }).lean();
+
+    if (!point) {
+      res.status(404).json({ status: 'error', message: 'Point not found for the given userId' });
+      return;
+    }
+
+    // Tìm `BinaryTree` chứa `pointId`
+    const treeNode = await BinaryTree.findOne({ pointId: point._id }).lean();
+
+    if (!treeNode) {
+      res.status(404).json({ status: 'error', message: 'BinaryTree node not found for the given userId' });
+      return;
+    }
+
+    console.log(treeNode)
+
+    const parentId = treeNode._id;
+
+    if (!parentId) {
+      res.status(400).json({ status: 'error', message: 'Invalid or missing parentId' });
+      return;
+    }
+
+    // Hàm đệ quy lấy toàn bộ các cấp dưới
+    const fetchAllDescendants = async (parentId: string): Promise<any[]> => {
       const childNodes = await BinaryTree.find({ parentId })
         .populate({
           path: 'pointId',
@@ -66,7 +92,7 @@ router.get('/members', async (req: Request, res: Response) => {
         })
         .lean();
 
-      const members = [];
+      const descendants = [];
       for (const node of childNodes) {
         const member = {
           id: node._id,
@@ -83,18 +109,18 @@ router.get('/members', async (req: Request, res: Response) => {
             : null,
         };
 
-        members.push(member);
+        descendants.push(member);
 
-        // Đệ quy tìm thành viên cấp dưới
-        const subMembers = await fetchMembersRecursively(member.id.toString());
-        members.push(...subMembers);
+        // Đệ quy lấy cấp dưới của node hiện tại
+        const subDescendants = await fetchAllDescendants(member.id.toString());
+        descendants.push(...subDescendants);
       }
 
-      return members;
+      return descendants;
     };
 
-    // Lấy node gốc từ `BinaryTree` tương ứng với user
-    const rootNode = await BinaryTree.findOne({ 'pointId.userId': new mongoose.Types.ObjectId(userId) })
+    // Lấy node chính bản thân
+    const selfNode = await BinaryTree.findById(parentId)
       .populate({
         path: 'pointId',
         model: 'Point',
@@ -105,36 +131,32 @@ router.get('/members', async (req: Request, res: Response) => {
       })
       .lean();
 
-    if (!rootNode) {
-      res.status(404).json({ status: 'error', message: 'Root node not found' });
+    if (!selfNode) {
+      res.status(404).json({ status: 'error', message: 'Parent node not found' });
       return;
     }
 
-    const members = [];
-
-    // Thêm chính bản thân người dùng vào danh sách
+    // Chuẩn bị dữ liệu cho chính bản thân
     const self = {
-      id: rootNode._id,
-      parentId: rootNode.parentId,
-      leftChildId: rootNode.leftChildId,
-      rightChildId: rootNode.rightChildId,
-      depth: rootNode.depth,
-      user: rootNode.pointId && (rootNode.pointId as any).userId
+      id: selfNode._id,
+      parentId: selfNode.parentId,
+      leftChildId: selfNode.leftChildId,
+      rightChildId: selfNode.rightChildId,
+      depth: selfNode.depth,
+      user: selfNode.pointId && (selfNode.pointId as any).userId
         ? {
-            id: (rootNode.pointId as any).userId._id,
-            username: (rootNode.pointId as any).userId.username,
-            globalWallet: (rootNode.pointId as any).userId.wallets.globalWallet,
+            id: (selfNode.pointId as any).userId._id,
+            username: (selfNode.pointId as any).userId.username,
+            globalWallet: (selfNode.pointId as any).userId.wallets.globalWallet,
           }
         : null,
     };
 
-    members.push(self);
+    // Lấy tất cả cấp dưới
+    const allDescendants = await fetchAllDescendants(parentId as string);
 
-    // Lấy tất cả các cấp dưới
-    const subMembers = await fetchMembersRecursively(rootNode._id.toString());
-    members.push(...subMembers);
-
-    res.status(200).json({ status: 'success', data: members });
+    // Gộp chính bản thân với các cấp dưới
+    res.status(200).json({ status: 'success', data: [self, ...allDescendants] });
   } catch (error) {
     console.error('Error fetching members:', error);
     res.status(500).json({ status: 'error', message: 'Internal Server Error' });
