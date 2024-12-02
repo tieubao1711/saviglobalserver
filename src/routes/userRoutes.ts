@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import User from '../models/User';
 import { authenticate } from '../middlewares/authMiddleware';
 import bcrypt from 'bcrypt';
+import Transaction from '../models/Transaction';
 
 const router = express.Router();
 
@@ -87,6 +88,35 @@ router.post('/change-password', authenticate, async (req: Request, res: Response
     res.status(200).json({ status: 'success', message: 'Đổi mật khẩu thành công.' });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Lỗi server, vui lòng thử lại sau.' });
+  }
+});
+
+router.get('/reward-history', authenticate, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      res.status(404).json({ status: 'error', message: 'Người dùng không tồn tại.' });
+      return;
+    }
+
+    // Lấy danh sách giao dịch (lọc theo `type: 'thưởng'`)
+    const transactions = await Transaction.find({ userId, type: 'thưởng' }).sort({ createdAt: -1 });
+
+    // Trả về dữ liệu
+    res.status(200).json({
+      username: user.username,
+      history: transactions.map(transaction => ({
+        date: transaction.createdAt,
+        amount: transaction.amount,
+        description: transaction.description || 'No description',
+        status: transaction.status,
+      })),
+    });
+  } catch (error) {
+    console.error('Error fetching reward history:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
