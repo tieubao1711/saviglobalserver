@@ -34,8 +34,8 @@ export async function generateFakeData() {
     for (let i = 1; i <= 100; i++) {
       // Tạo User
       const user = await User.create({
-        username: `User${i}`,
-        password: 'hashed_password',
+        username: `user${i}`,
+        password: '123123a',
         fullName: `User FullName ${i}`,
         idCard: `IDCard${i}`,
         dateOfBirth: new Date(1990, 0, i % 30 + 1),
@@ -160,8 +160,8 @@ async function completeBinaryTree(nodes: IBinaryTree[]) {
 
 // Tạo Cron Job
 export function setupCronJob() {
-  // Chạy mỗi 10 phút
-  schedule.scheduleJob('*/10 * * * *', async () => {
+    // Chạy mỗi 30 giây
+    schedule.scheduleJob('*/30 * * * * *', async () => {
     try {
       console.log('Running profit distribution test...');
       await distributeProfit(); // Gọi hàm phân phối lợi nhuận
