@@ -2,11 +2,12 @@ import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Product, { IProduct } from '../models/Product';
 import { Cart, ICartPopulatedItem } from '../models/CartItem';
+import { authenticate } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
 // Add to Cart
-router.post('/carts', async (req: Request, res: Response): Promise<void> => {
+router.post('/carts', authenticate, async (req: Request, res: Response): Promise<void> => {
     const { productId, quantity } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(productId) || quantity <= 0) {
@@ -66,7 +67,7 @@ router.post('/carts', async (req: Request, res: Response): Promise<void> => {
 });
 
 // Get Cart
-router.get('/carts', async (req: Request, res: Response): Promise<void> => {
+router.get('/carts', authenticate, async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).user.id;
 
@@ -96,7 +97,7 @@ router.get('/carts', async (req: Request, res: Response): Promise<void> => {
 });
 
 // Checkout
-router.post('/carts/checkout', async (req: Request, res: Response): Promise<void> => {
+router.post('/carts/checkout', authenticate, async (req: Request, res: Response): Promise<void> => {
     const { paymentMethod, address } = req.body;
 
     if (!paymentMethod || !address) {
