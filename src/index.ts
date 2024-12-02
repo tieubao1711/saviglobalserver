@@ -18,21 +18,30 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 1711;
 
+// Cấu hình CORS chỉ cho phép truy cập từ localhost:3000 và saviglobal.xyz
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',  // Cái này sẽ cho phép frontend localhost
+    'https://saviglobal.xyz', // Cái này cho phép frontend production
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức mà bạn cho phép
+  allowedHeaders: ['Content-Type', 'Authorization'], // Các header mà bạn cho phép
+  credentials: true, // Cho phép gửi cookie từ client
+};
+
+app.use(cors(corsOptions));  // Sử dụng CORS với options đã cấu hình
+
+// Session middleware
 app.use(session({
   secret: process.env.CAPTCHA_SECRET || 'captcha_secret',
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: false, // Đặt `true` nếu sử dụng HTTPS
+    secure: false, // Đặt true nếu sử dụng HTTPS
     httpOnly: false, // Cho phép truy cập từ phía client
     sameSite: 'lax' // Hoặc 'none' nếu sử dụng HTTPS
   }
 }));
-
-// cors?
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/saviglobal';
@@ -48,9 +57,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/admin', adminRoutes);
-
 app.use('/api', testRoutes);
-
 app.use('/api', cartRoutes);
 app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
