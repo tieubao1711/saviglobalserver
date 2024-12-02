@@ -147,4 +147,48 @@ router.post('/carts/checkout', authenticate, async (req: Request, res: Response)
     }
 });
 
+router.delete('/carts/:productId', authenticate, async (req: Request, res: Response): Promise<void> => {
+    const { productId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+        res.status(400).json({ status: 'error', message: 'Invalid productId' });
+        return;
+    }
+
+    try {
+        // Lấy userId từ phiên đăng nhập
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ status: 'error', message: 'User not authenticated' });
+            return;
+        }
+
+        // Tìm giỏ hàng của người dùng
+        const cart = await Cart.findOne({ userId });
+        if (!cart) {
+            res.status(404).json({ status: 'error', message: 'Cart not found' });
+            return;
+        }
+
+        // Tìm sản phẩm trong giỏ hàng
+        const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+        if (existingItemIndex === -1) {
+            res.status(404).json({ status: 'error', message: 'Product not found in cart' });
+            return;
+        }
+
+        // Giảm tổng giá và xóa sản phẩm khỏi giỏ hàng
+        const removedItem = cart.items.splice(existingItemIndex, 1)[0];
+        cart.totalPrice -= removedItem.totalPrice;
+
+        // Cập nhật giỏ hàng
+        await cart.save();
+
+        res.json({ status: 'success', message: 'Product removed from cart' });
+    } catch (error) {
+        console.error('Error removing product from cart:', error);
+        res.status(500).json({ status: 'error', message: 'Internal server error' });
+    }
+});
+
 export default router;
