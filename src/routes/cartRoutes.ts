@@ -110,7 +110,11 @@ router.post('/carts/checkout', authenticate, async (req: Request, res: Response)
     }
 
     try {
-        const userId = (req as any).user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ status: 'error', message: 'User not authenticated' });
+            return;
+        }
 
         const cart = await Cart.findOne({ userId });
 
