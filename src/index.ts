@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import productRoutes from './routes/productRoutes';
 import captchaRoutes from './routes/captchaRoutes';
+import cartRoutes from './routes/cartRoutes';
 import session from 'express-session';
 import cors from 'cors';
 
@@ -45,6 +46,7 @@ app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api', cartRoutes);
 
 // Start Server
 app.listen(PORT, () => {
