@@ -69,7 +69,11 @@ router.post('/carts', authenticate, async (req: Request, res: Response): Promise
 // Get Cart
 router.get('/carts', authenticate, async (req: Request, res: Response): Promise<void> => {
     try {
-        const userId = (req as any).user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ status: 'error', message: 'User not authenticated' });
+            return;
+        }
 
         // Tìm giỏ hàng và populate productId
         const cart = await Cart.findOne({ userId })
