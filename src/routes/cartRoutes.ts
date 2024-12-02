@@ -23,7 +23,11 @@ router.post('/carts', async (req: Request, res: Response): Promise<void> => {
         }
 
         // Giả định userId được lấy từ phiên đăng nhập
-        const userId = (req as any).user.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            res.status(401).json({ status: 'error', message: 'User not authenticated' });
+            return;
+        }
 
         let cart = await Cart.findOne({ userId });
 
