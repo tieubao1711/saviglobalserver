@@ -18,18 +18,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 1711;
 
-// Cấu hình CORS chỉ cho phép truy cập từ localhost:3000 và saviglobal.xyz
+// Cấu hình CORS
 const corsOptions = {
   origin: [
-    'http://localhost:3000',  // Cái này sẽ cho phép frontend localhost
-    'https://saviglobal.xyz', // Cái này cho phép frontend production
+    'https://saviglobal.xyz', // Cho phép từ production domain
+    'http://localhost:3000',  // Cho phép từ local dev domain
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức mà bạn cho phép
-  allowedHeaders: ['Content-Type', 'Authorization'], // Các header mà bạn cho phép
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Access-Control-Allow-Headers', 
+    'Access-Control-Allow-Methods',
+  ], // Các header cần thiết
   credentials: true, // Cho phép gửi cookie từ client
+  preflightContinue: false,
+  optionsSuccessStatus: 204, // Đặt status code cho response preflight (OPTIONS)
 };
 
-app.use(cors(corsOptions));  // Sử dụng CORS với options đã cấu hình
+app.use(cors(corsOptions)); // Cấu hình CORS middleware với options đã cập nhật
 
 // Session middleware
 app.use(session({
@@ -53,7 +60,7 @@ mongoose
 
 // Routes
 app.get('/', (req, res) => {
-    res.send('Hello, TypeScript with MongoDB!');
+  res.send('Hello, TypeScript with MongoDB!');
 });
 
 app.use('/api/admin', adminRoutes);
