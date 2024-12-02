@@ -8,6 +8,8 @@ import captchaRoutes from './routes/captchaRoutes';
 import cartRoutes from './routes/cartRoutes';
 import session from 'express-session';
 import cors from 'cors';
+import testRoutes from './routes/testRoutes'; // Import test routes
+import binaryTree from './routes/binaryTreeRoutes';
 
 dotenv.config();
 
@@ -42,6 +44,9 @@ mongoose
 app.get('/', (req, res) => {
     res.send('Hello, TypeScript with MongoDB!');
 });
+
+app.use('/api', testRoutes);
+app.use('/api', binaryTree);
 
 app.use('/api', captchaRoutes);
 app.use('/api/auth', authRoutes);
