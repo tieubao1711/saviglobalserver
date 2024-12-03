@@ -12,7 +12,8 @@ import testRoutes from './routes/testRoutes'; // Import test routes
 import binaryTreeRoutes from './routes/binaryTreeRoutes';
 import adminRoutes from './routes/adminRoutes';
 import initData from './configs/initdata';
-import { updateRanksForAllUsers } from './services/rank/updateRank';
+import { updateRanksForAllUsers } from './services/update/updateRank';
+import { updateWalletsForAllUsers } from './services/update/updateWallets';
 
 dotenv.config();
 
@@ -66,4 +67,5 @@ app.listen(PORT, () => {
 
 // initialize base data
 initData();
-updateRanksForAllUsers();
+//updateRanksForAllUsers();
+updateWalletsForAllUsers();
