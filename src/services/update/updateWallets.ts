@@ -8,7 +8,7 @@ export const updateWalletsForAllUsers = async () => {
             // Cập nhật toàn bộ wallets
             const updatedWallets = {
                 consumptionWallet: 400,
-                sharingWallet: user.wallets.sharingWallet || 0, 
+                sharingWallet: 0, 
                 levelWallet: user.wallets.levelWallet || 0,
                 agencyWallet: user.wallets.agencyWallet || 0,
                 globalWallet: 256,
