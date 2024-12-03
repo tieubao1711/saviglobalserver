@@ -12,6 +12,7 @@ import testRoutes from './routes/testRoutes'; // Import test routes
 import binaryTreeRoutes from './routes/binaryTreeRoutes';
 import adminRoutes from './routes/adminRoutes';
 import initData from './configs/initdata';
+import { updateRanksForAllUsers } from './services/rank/updateRank';
 
 dotenv.config();
 
@@ -65,3 +66,4 @@ app.listen(PORT, () => {
 
 // initialize base data
 initData();
+updateRanksForAllUsers();

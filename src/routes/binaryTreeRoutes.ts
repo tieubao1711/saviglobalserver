@@ -163,4 +163,73 @@ router.get('/members', authenticate, async (req: Request, res: Response) => {
   }
 });
 
+const countDescendants = async (parentId: string): Promise<number> => {
+  const childNodes = await BinaryTree.find({ parentId }).lean();
+  
+  let count = childNodes.length;
+
+  for (const node of childNodes) {
+    const subCount = await countDescendants(node._id.toString()); // Đệ quy
+    count += subCount;
+  }
+
+  return count;
+};
+
+// Router cập nhật cấp bậc người dùng
+router.put('/update-rank', async (req: Request, res: Response) => {
+  try {
+    const userId = req.body.userId; // Lấy userId từ body request
+    if (!userId) {
+      res.status(400).json({ status: 'error', message: 'UserId is required' });
+      return;
+    }
+
+    // Tìm userId trong BinaryTree
+    const userBinaryTreeNode = await BinaryTree.findOne({ 'pointId.userId': userId }).lean();
+    if (!userBinaryTreeNode) {
+      res.status(404).json({ status: 'error', message: 'User not found in BinaryTree' });
+      return;
+    }
+
+    const parentId = userBinaryTreeNode._id.toString(); // Lấy parentId của user
+
+    // Đếm số lượng cấp dưới
+    const numDescendants = await countDescendants(parentId);
+
+    // Xác định rank mới dựa trên số lượng cấp dưới
+    let newRank = 'SAVI 1';
+    if (numDescendants >= 1000) {
+      newRank = 'SAVI 6';
+    } else if (numDescendants >= 600) {
+      newRank = 'SAVI 5';
+    } else if (numDescendants >= 300) {
+      newRank = 'SAVI 4';
+    } else if (numDescendants >= 100) {
+      newRank = 'SAVI 3';
+    } else if (numDescendants >= 30) {
+      newRank = 'SAVI 2';
+    }
+
+    // Cập nhật rank cho người dùng
+    const user = await User.findByIdAndUpdate(userId, { rank: newRank }, { new: true });
+
+    if (!user) {
+      res.status(404).json({ status: 'error', message: 'User not found' });
+      return;
+    }
+
+    // Trả về kết quả
+    res.status(200).json({
+      status: 'success',
+      message: `Rank updated successfully to ${newRank}`,
+      data: user,
+    });
+
+  } catch (error) {
+    console.error('Error updating rank:', error);
+    res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+  }
+});
+
 export default router;
