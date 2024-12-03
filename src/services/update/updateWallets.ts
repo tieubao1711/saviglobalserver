@@ -7,11 +7,11 @@ export const updateWalletsForAllUsers = async () => {
         for (const user of users) {
             // Cập nhật toàn bộ wallets
             const updatedWallets = {
-                consumptionWallet: user.wallets.consumptionWallet || 0,
-                sharingWallet: 400, // Giá trị mới
+                consumptionWallet: 400,
+                sharingWallet: user.wallets.sharingWallet || 0, 
                 levelWallet: user.wallets.levelWallet || 0,
                 agencyWallet: user.wallets.agencyWallet || 0,
-                globalWallet: 256, // Giá trị mới
+                globalWallet: 256,
             };
 
             const updatedUser = await User.findByIdAndUpdate(
