@@ -48,7 +48,7 @@ const UserSchema: Schema = new Schema(
     address: { type: String }, // Địa chỉ
     referralCode: { type: String },
     uplineId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    rank: { type: String, enum: ['SAVI 1', 'SAVI 2', 'SAVI 3', 'SAVI 4', 'SAVI 5', 'SAVI 6'], default: 'SAVI 1' },
+    rank: { type: String, enum: ['SAVI 0', 'SAVI 1', 'SAVI 2', 'SAVI 3', 'SAVI 4', 'SAVI 5', 'SAVI 6'], default: 'SAVI 0' },
     totalIncome: { type: Number, default: 0 },
     maxIncome: { type: Number, default: 10000000 },
     status: { type: String, enum: ['active', 'suspended'], default: 'active' },

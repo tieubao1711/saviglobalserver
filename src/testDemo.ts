@@ -7,6 +7,7 @@ import { distributeProfit } from './services/profit/distributeProfit';
 import User from './models/User';
 import { Order } from './models/Order';
 import bcrypt from 'bcrypt';
+import { CompanyWallet } from './models/CompanyWallet';
 
 // Kết nối MongoDB
 export async function connectDB() {
@@ -32,7 +33,7 @@ export async function generateFakeData() {
     console.log('Generating fake data...');
     const binaryTreeNodes = [];
     const hashedPassword = await bcrypt.hash('123123a', 10);
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 130; i++) {
       // Tạo User
       const user = await User.create({
         username: `user${i}`,
@@ -47,7 +48,7 @@ export async function generateFakeData() {
         email: `user${i}@example.com`,
         address: `Address ${i}`,
         referralCode: `REF${i}`,
-        rank: `SAVI ${i % 6 + 1}`,
+        rank: `SAVI 1`,
         totalIncome: 0,
         maxIncome: 10000000,
         status: 'active',
@@ -79,6 +80,27 @@ export async function generateFakeData() {
         totalPrice,
         status: 'Completed', // Đơn hàng luôn hoàn thành
       });
+      
+      // Tính toán tỷ lệ chia
+      const profitPercentage = 62.5 / 100; // 62.5%
+      const sharePercentage = 71 / 100; // 71%
+
+      const profitAmount = totalPrice * profitPercentage;
+      const shareAmount = profitAmount * sharePercentage;
+      const stockAmount = profitAmount - shareAmount;
+      
+      // Cập nhật ví công ty
+      await CompanyWallet.findOneAndUpdate(
+        { companyName: 'SAVI' }, // Tìm ví công ty "SAVI"
+        {
+          $inc: {
+            profitWallet: profitAmount, // Thêm vào ví lợi nhuận
+            stockWallet: stockAmount,  // Thêm vào ví tiền hàng
+            sharedWallet: shareAmount, // Thêm vào ví chia thưởng
+          },
+        },
+        { new: true } // Trả về tài liệu đã cập nhật
+      ).exec();
 
       // Tạo Point
       const point = await Point.create({

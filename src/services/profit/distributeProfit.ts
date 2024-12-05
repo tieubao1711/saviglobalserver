@@ -1,22 +1,15 @@
 import { sharePerPoint } from './sharePerPoint';
 import { sharePerLevel } from './sharePerLevel';
 import { Order } from '../../models/Order';
+import { CompanyWallet } from '../../models/CompanyWallet';
+import { sharePerSAVI } from './sharePerSAVI';
 
 export const distributeProfit = async () => {
   try {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    const companyWallet = await CompanyWallet.findOne({companyName: 'SAVI'});
+    if (!companyWallet) return;
 
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
-    // Lấy tổng giá trị đơn hàng trong ngày
-    const totalProfit = await Order.aggregate([
-      { $match: { createdAt: { $gte: startOfDay, $lte: endOfDay } } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }, // Sử dụng 'totalPrice' thay vì 'totalProfit'
-    ]);
-
-    const profit = totalProfit[0]?.total || 0;
+    const profit = companyWallet.sharedWallet;
 
     console.log(`Total profit for the day: ${profit}`);
 
@@ -29,6 +22,14 @@ export const distributeProfit = async () => {
     const profitForLevels = profit * 0.15;
     console.log(`Profit allocated for levels: ${profitForLevels}`);
     await sharePerLevel(profitForLevels);
+
+    // Chia 26% lợi nhuận cho 6 cấp lãnh đạo SAVI
+    const profitForSAVIs = profit * 0.26;
+    await sharePerSAVI(profitForSAVIs);
+
+    // Chia 10% lợi nhuận của tuyến trên
+
+    //  
 
     console.log('Profit distribution completed successfully.');
   } catch (error) {

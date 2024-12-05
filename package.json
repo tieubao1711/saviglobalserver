@@ -7,7 +7,7 @@
     "start:dev": "pm2 start ecosystem.config.js --env development",
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -w",
-    "serve": "node ./dist/index.js"
+    "serve": "tsc -p tsconfig.json && node ./dist/index.js"
   },
   "keywords": [],
   "author": "",

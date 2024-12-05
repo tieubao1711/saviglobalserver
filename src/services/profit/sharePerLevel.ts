@@ -4,9 +4,9 @@ import Transaction from "../../models/Transaction";
 import User from "../../models/User";
 
 export const sharePerLevel = async (profit: number) => {
-  const profitPerLevel = profit * 0.15 / 24;
+  const profitPerLevel = profit / 24;
 
-  for (let level = 1; level <= 24; level++) {
+  for (let level = 0; level <= 23; level++) {
     const nodesAtLevel = await BinaryTree.find({ depth: level, pointId: { $ne: null } });
 
     if (nodesAtLevel.length > 0) {

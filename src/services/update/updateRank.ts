@@ -46,7 +46,7 @@ export const updateRanksForAllUsers = async () => {
             const numDescendants = await countDescendants(parentId);
 
             // Xác định rank mới dựa trên số lượng cấp dưới
-            let newRank = 'SAVI 1';
+            let newRank = 'SAVI 0';
             if (numDescendants >= 1000) {
                 newRank = 'SAVI 6';
             } else if (numDescendants >= 600) {
@@ -57,11 +57,12 @@ export const updateRanksForAllUsers = async () => {
                 newRank = 'SAVI 3';
             } else if (numDescendants >= 30) {
                 newRank = 'SAVI 2';
+            }else if (numDescendants >= 5) {
+                newRank = 'SAVI 1';
             }
 
             // Cập nhật rank cho người dùng
             const updatedUser = await User.findByIdAndUpdate(user._id, { rank: newRank }, { new: true });
-
             console.log(`Cập nhật rank cho user ${user.username} thành ${newRank}`);
         }
     } catch (error) {

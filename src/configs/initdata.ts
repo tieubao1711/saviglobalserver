@@ -1,5 +1,6 @@
-import Admin from '../models/Admin'; // Đảm bảo bạn có model Admin
+import Admin from '../models/Admin'; // Model Admin
 import bcrypt from 'bcrypt';
+import { CompanyWallet } from '../models/CompanyWallet';
 
 const initData = async function () {
   try {
@@ -22,6 +23,25 @@ const initData = async function () {
       console.log('Admin đã được tạo thành công.');
     } else {
       console.log('Admin đã tồn tại.');
+    }
+
+    // Kiểm tra xem ví công ty "SAVI" đã tồn tại chưa
+    const existingWallet = await CompanyWallet.findOne({ companyName: 'SAVI' });
+
+    if (!existingWallet) {
+      // Nếu chưa có, tạo ví công ty "SAVI" với giá trị mặc định
+      const newWallet = new CompanyWallet({
+        companyName: 'SAVI',
+        stockWallet: 0, // Số dư ví tiền hàng mặc định
+        profitWallet: 0, // Số dư ví lợi nhuận mặc định
+      });
+
+      // Lưu ví công ty vào cơ sở dữ liệu
+      await newWallet.save();
+
+      console.log('Ví công ty "SAVI" đã được tạo thành công.');
+    } else {
+      console.log('Ví công ty "SAVI" đã tồn tại.');
     }
   } catch (error) {
     console.error('Lỗi khi khởi tạo dữ liệu:', error);

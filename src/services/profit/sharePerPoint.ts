@@ -6,7 +6,7 @@ export const sharePerPoint = async (profit: number) => {
   const allPoints = await Point.countDocuments();
   if (allPoints === 0) return;
 
-  const profitPerPoint = profit * 0.1 / allPoints;
+  const profitPerPoint = profit / allPoints;
 
   const userPoints = await Point.aggregate([
     {
