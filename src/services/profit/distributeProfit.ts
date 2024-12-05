@@ -3,6 +3,7 @@ import { sharePerLevel } from './sharePerLevel';
 import { Order } from '../../models/Order';
 import { CompanyWallet } from '../../models/CompanyWallet';
 import { sharePerSAVI } from './sharePerSAVI';
+import { profitForAgency } from './sharePerAgency';
 
 export const distributeProfit = async () => {
   try {
@@ -25,11 +26,13 @@ export const distributeProfit = async () => {
 
     // Chia 26% lợi nhuận cho 6 cấp lãnh đạo SAVI
     const profitForSAVIs = profit * 0.26;
-    await sharePerSAVI(profitForSAVIs);
+    await sharePerSAVI(profit);
+
+    //  Chia 10% lợi nhuận cho đại lý
+    const profitForAgencies = profit * 0.1;
+    await profitForAgency(profit);
 
     // Chia 10% lợi nhuận của tuyến trên
-
-    //  
 
     console.log('Profit distribution completed successfully.');
   } catch (error) {

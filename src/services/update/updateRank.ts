@@ -37,7 +37,7 @@ export const updateRanksForAllUsers = async () => {
                 continue; // Tiếp tục với người dùng tiếp theo
             }
 
-            console.log(`Found BinaryTree node for user ${user._id}:`, treeNode);
+            //console.log(`Found BinaryTree node for user ${user._id}:`, treeNode);
 
             // Lấy parentId từ BinaryTree node
             const parentId = treeNode._id.toString();
@@ -63,7 +63,7 @@ export const updateRanksForAllUsers = async () => {
 
             // Cập nhật rank cho người dùng
             const updatedUser = await User.findByIdAndUpdate(user._id, { rank: newRank }, { new: true });
-            console.log(`Cập nhật rank cho user ${user.username} thành ${newRank}`);
+            //console.log(`Cập nhật rank cho user ${user.username} thành ${newRank}`);
         }
     } catch (error) {
         console.error('Error updating ranks for all users:', error);

@@ -176,6 +176,99 @@ const countDescendants = async (parentId: string): Promise<number> => {
   return count;
 };
 
+
+router.get('/3upline', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id; // Lấy userId từ middleware authenticate
+  
+    if (!userId) {
+      res.status(401).json({ status: 'error', message: 'User not authenticated' });
+      return;
+    }
+  
+    // Tìm `Point` chứa `userId`
+    const point = await Point.findOne({ userId }).lean();
+  
+    if (!point) {
+      res.status(404).json({ status: 'error', message: 'Point not found for the given userId' });
+      return;
+    }
+  
+    // Tìm `BinaryTree` chứa `pointId`
+    const treeNode = await BinaryTree.findOne({ pointId: point._id }).lean();
+  
+    if (!treeNode) {
+      res.status(404).json({ status: 'error', message: 'BinaryTree node not found for the given userId' });
+      return;
+    }
+  
+    const currentNodeId = treeNode._id;
+  
+    if (!currentNodeId) {
+      res.status(400).json({ status: 'error', message: 'Invalid or missing node ID' });
+      return;
+    }
+  
+    // Hàm lấy danh sách upline (từ parent lên đến root)
+    const fetchUpline = async (nodeId: string): Promise<any[]> => {
+      const upline = [];
+  
+      let currentNode = await BinaryTree.findById(nodeId)
+        .populate({
+          path: 'pointId',
+          model: 'Point',
+          populate: {
+            path: 'userId',
+            model: 'User',
+          },
+        })
+        .lean();
+  
+      while (currentNode?.parentId) {
+        const parentNode = await BinaryTree.findById(currentNode.parentId)
+          .populate({
+            path: 'pointId',
+            model: 'Point',
+            populate: {
+              path: 'userId',
+              model: 'User',
+            },
+          })
+          .lean();
+  
+        if (parentNode) {
+          upline.push({
+            id: parentNode._id,
+            parentId: parentNode.parentId,
+            leftChildId: parentNode.leftChildId,
+            rightChildId: parentNode.rightChildId,
+            depth: parentNode.depth,
+            user: parentNode.pointId && (parentNode.pointId as any).userId
+              ? {
+                  id: (parentNode.pointId as any).userId._id,
+                  username: (parentNode.pointId as any).userId.username,
+                  globalWallet: (parentNode.pointId as any).userId.wallets.globalWallet,
+                }
+              : null,
+          });
+        }
+        currentNode = parentNode; // Tiếp tục duyệt lên cấp trên
+      }
+  
+      return upline;
+    };
+  
+    // Lấy danh sách upline
+    const upline = await fetchUpline(currentNodeId.toString());
+  
+    // Trả về kết quả
+    res.status(200).json({ status: 'success', data: upline });
+  } catch (error) {
+    console.error('Error fetching upline:', error);
+    res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+  }   
+});
+
 // Router cập nhật cấp bậc người dùng
 router.put('/update-rank', async (req: Request, res: Response) => {
   try {

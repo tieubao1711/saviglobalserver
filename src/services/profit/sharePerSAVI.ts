@@ -4,12 +4,12 @@ import User from "../../models/User";
 
 export const sharePerSAVI = async (profit: number) => {
   const rankDistribution = {
-    savi1: { ids: 5, percent: 10 },
-    savi2: { ids: 30, percent: 6 },
-    savi3: { ids: 100, percent: 4 },
-    savi4: { ids: 300, percent: 3 },
-    savi5: { ids: 600, percent: 2 },
-    savi6: { ids: 1000, percent: 1 },
+    'SAVI 1': { ids: 5, percent: 10 },
+    'SAVI 2': { ids: 30, percent: 6 },
+    'SAVI 3': { ids: 100, percent: 4 },
+    'SAVI 4': { ids: 300, percent: 3 },
+    'SAVI 5': { ids: 600, percent: 2 },
+    'SAVI 6': { ids: 1000, percent: 1 },
   };
 
   for (const [rank, { ids, percent }] of Object.entries(rankDistribution)) {

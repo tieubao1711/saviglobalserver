@@ -20,7 +20,7 @@ export const updateWalletsForAllUsers = async () => {
                 { new: true }
             );
 
-            console.log(`Cập nhật wallets cho user ${user.username}`);
+            //console.log(`Cập nhật wallets cho user ${user.username}`);
         }
     } catch (error) {
         console.error("Error updating wallets for all users:", error);

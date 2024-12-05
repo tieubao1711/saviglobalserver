@@ -14,6 +14,7 @@ import adminRoutes from './routes/adminRoutes';
 import initData from './configs/initdata';
 import { updateRanksForAllUsers } from './services/update/updateRank';
 import { updateWalletsForAllUsers } from './services/update/updateWallets';
+import { updateAgencyForAllUsers } from './services/update/updateAgency';
 
 dotenv.config();
 
@@ -67,5 +68,6 @@ app.listen(PORT, () => {
 
 // initialize base data
 initData();
-updateRanksForAllUsers();
-updateWalletsForAllUsers();
+// updateRanksForAllUsers();
+// updateWalletsForAllUsers();
+// updateAgencyForAllUsers();
