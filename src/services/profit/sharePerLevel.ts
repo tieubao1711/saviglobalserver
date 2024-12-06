@@ -1,38 +1,39 @@
 import { BinaryTree } from "../../models/BinaryTree";
-import { Point } from "../../models/Point";
 import Transaction from "../../models/Transaction";
 import User from "../../models/User";
 
-export const sharePerLevel = async (profit: number) => {
-  const profitPerLevel = profit / 24;
+export const sharePerLevel = async (profit: number): Promise<Record<string, number>> => {
+  const levelDistribution = 24;
+  const profitPerLevel = profit / levelDistribution;
 
-  for (let level = 0; level <= 23; level++) {
-    const nodesAtLevel = await BinaryTree.find({ depth: level, pointId: { $ne: null } });
+  const levelProfits: Record<string, number> = {};
 
-    if (nodesAtLevel.length > 0) {
-      const profitPerId = profitPerLevel / nodesAtLevel.length;
+  const users = await BinaryTree.aggregate([
+    { $group: { _id: "$userId", depth: { $max: "$depth" } } },
+  ]);
 
-      for (const node of nodesAtLevel) {
-        const point = await Point.findById(node.pointId);
-        if (point) {
-          // Cập nhật ví tổng (globalWallet)
-          await User.updateOne(
-            { _id: point.userId },
-            { $inc: { "wallets.globalWallet": profitPerId } } // Cập nhật vào ví tổng
-          );
+  for (const user of users) {
+    const userProfit = profitPerLevel;
 
-          // Lưu lịch sử trả thưởng
-          const transaction = new Transaction({
-            userId: point.userId,
-            type: 'thưởng',
-            amount: profitPerId,
-            description: `Chia thưởng 15% lợi nhuận tổng cho tầng ${level}`,
-            createdAt: new Date(),
-          });
+    await User.updateOne(
+      { _id: user._id },
+      { $inc: { "wallets.globalWallet": userProfit } }
+    );
 
-          await transaction.save();
-        }
-      }
-    }
+    const transaction = new Transaction({
+      userId: user._id,
+      type: "thưởng",
+      amount: userProfit,
+      description: `Chia thưởng từ ${levelDistribution} cấp`,
+      createdAt: new Date(),
+    });
+
+    await transaction.save();
+
+    levelProfits[user._id] = (levelProfits[user._id] || 0) + userProfit;
+
+    console.log(`User ${user._id} received ${userProfit} from Levels.`);
   }
+
+  return levelProfits;
 };

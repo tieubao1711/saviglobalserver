@@ -1,18 +1,19 @@
-import { Point } from "../../models/Point";
 import Transaction from "../../models/Transaction";
 import User from "../../models/User";
 
-export const sharePerSAVI = async (profit: number) => {
+export const sharePerSAVI = async (profit: number): Promise<Record<string, number>> => {
   const rankDistribution = {
-    'SAVI 1': { ids: 5, percent: 10 },
-    'SAVI 2': { ids: 30, percent: 6 },
-    'SAVI 3': { ids: 100, percent: 4 },
-    'SAVI 4': { ids: 300, percent: 3 },
-    'SAVI 5': { ids: 600, percent: 2 },
-    'SAVI 6': { ids: 1000, percent: 1 },
+    "SAVI 1": { ids: 5, percent: 10 },
+    "SAVI 2": { ids: 30, percent: 6 },
+    "SAVI 3": { ids: 100, percent: 4 },
+    "SAVI 4": { ids: 300, percent: 3 },
+    "SAVI 5": { ids: 600, percent: 2 },
+    "SAVI 6": { ids: 1000, percent: 1 },
   };
 
-  for (const [rank, { ids, percent }] of Object.entries(rankDistribution)) {
+  const rankProfits: Record<string, number> = {};
+
+  for (const [rank, { percent }] of Object.entries(rankDistribution)) {
     const rankProfit = (profit * percent) / 100;
 
     // Lấy danh sách người dùng theo rank
@@ -34,11 +35,18 @@ export const sharePerSAVI = async (profit: number) => {
         userId: user._id,
         type: "thưởng",
         amount: profitPerUser,
-        description: `Chia thưởng ${percent}% lợi nhuận từ rank ${rank} (${users.length} ID)`,
+        description: `Chia thưởng ${percent}% lợi nhuận từ rank ${rank}`,
         createdAt: new Date(),
       });
 
       await transaction.save();
+
+      // Cập nhật lợi nhuận hôm nay
+      rankProfits[user._id.toString()] = (rankProfits[user._id.toString()] || 0) + profitPerUser;
+
+      console.log(`User ${user._id} (Rank ${rank}) received ${profitPerUser}.`);
     }
   }
+
+  return rankProfits;
 };

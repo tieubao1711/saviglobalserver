@@ -1,38 +1,56 @@
 import { sharePerPoint } from './sharePerPoint';
 import { sharePerLevel } from './sharePerLevel';
-import { Order } from '../../models/Order';
-import { CompanyWallet } from '../../models/CompanyWallet';
 import { sharePerSAVI } from './sharePerSAVI';
 import { profitForAgency } from './sharePerAgency';
+import { CompanyWallet } from '../../models/CompanyWallet';
+import User from '../../models/User';
 
 export const distributeProfit = async () => {
   try {
-    const companyWallet = await CompanyWallet.findOne({companyName: 'SAVI'});
-    if (!companyWallet) return;
+    const companyWallet = await CompanyWallet.findOne({ companyName: 'SAVI' });
+    if (!companyWallet) {
+      console.log('Company wallet not found.');
+      return;
+    }
 
     const profit = companyWallet.sharedWallet;
 
     console.log(`Total profit for the day: ${profit}`);
 
-    // Chia 10% lợi nhuận cho tất cả ID
+    // Chia lợi nhuận
     const profitForPoints = profit * 0.1;
-    console.log(`Profit allocated for points: ${profitForPoints}`);
-    await sharePerPoint(profitForPoints);
-
-    // Chia 15% lợi nhuận cho 24 tầng
     const profitForLevels = profit * 0.15;
-    console.log(`Profit allocated for levels: ${profitForLevels}`);
-    await sharePerLevel(profitForLevels);
-
-    // Chia 26% lợi nhuận cho 6 cấp lãnh đạo SAVI
     const profitForSAVIs = profit * 0.26;
-    await sharePerSAVI(profit);
-
-    //  Chia 10% lợi nhuận cho đại lý
     const profitForAgencies = profit * 0.1;
-    await profitForAgency(profit);
 
-    // Chia 10% lợi nhuận của tuyến trên
+    // Gọi các hàm phân phối và thu thập lợi nhuận từng user
+    const pointProfits = await sharePerPoint(profitForPoints);
+    const levelProfits = await sharePerLevel(profitForLevels);
+    const saviProfits = await sharePerSAVI(profitForSAVIs);
+    const agencyProfits = await profitForAgency(profitForAgencies);
+
+    // Hợp nhất lợi nhuận từ các nguồn
+    const totalProfits: Record<string, number> = {};
+
+    const mergeProfits = (source: Record<string, number>) => {
+      for (const [userId, profit] of Object.entries(source)) {
+        totalProfits[userId] = (totalProfits[userId] || 0) + profit;
+      }
+    };
+
+    mergeProfits(pointProfits);
+    mergeProfits(levelProfits);
+    mergeProfits(saviProfits);
+    mergeProfits(agencyProfits);
+
+    // Cập nhật tổng lợi nhuận vào ví của user và lưu log
+    for (const [userId, profit] of Object.entries(totalProfits)) {
+      await User.updateOne(
+        { _id: userId },
+        { $inc: { "wallets.globalWallet": profit } }
+      );
+      console.log(`User ${userId} received a total profit of ${profit}`);
+    }
 
     console.log('Profit distribution completed successfully.');
   } catch (error) {
