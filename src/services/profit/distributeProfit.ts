@@ -2,6 +2,7 @@ import { sharePerPoint } from './sharePerPoint';
 import { sharePerLevel } from './sharePerLevel';
 import { sharePerSAVI } from './sharePerSAVI';
 import { profitForAgency } from './sharePerAgency';
+import { distributeUplineProfit } from './sharePerUpline'; // Import hàm chia tuyến trên
 import { CompanyWallet } from '../../models/CompanyWallet';
 import User from '../../models/User';
 
@@ -51,6 +52,9 @@ export const distributeProfit = async () => {
       );
       console.log(`User ${userId} received a total profit of ${profit}`);
     }
+
+    // Phân phối lợi nhuận từ tuyến trên
+    await distributeUplineProfit(totalProfits);
 
     console.log('Profit distribution completed successfully.');
   } catch (error) {
