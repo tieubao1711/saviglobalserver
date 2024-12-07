@@ -66,7 +66,7 @@ export async function generateFakeData() {
         {
           productId: new mongoose.Types.ObjectId(), // ID giả định
           quantity: 1, // Số lượng cố định
-          price: 6400000, // Giá mỗi sản phẩm
+          price: 256, // Giá mỗi sản phẩm
         },
       ];
 
