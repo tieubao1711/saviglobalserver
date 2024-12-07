@@ -2,11 +2,11 @@ import { Point } from "../../models/Point";
 import Transaction from "../../models/Transaction";
 import User from "../../models/User";
 
-export const sharePerPoint = async (profit: number): Promise<Record<string, number>> => {
+export const sharePerLevel2 = async (profit: number): Promise<Record<string, number>> => {
   const allPoints = await Point.countDocuments();
   if (allPoints === 0) return {};
 
-  const profitPerPoint = profit / allPoints;
+  const profitPerPoint = profit / allPoints / 24;
   const userProfits: Record<string, number> = {};
 
   const userPoints = await Point.aggregate([
@@ -32,7 +32,7 @@ export const sharePerPoint = async (profit: number): Promise<Record<string, numb
       userId: user._id,
       type: "thưởng",
       amount: userShare,
-      description: `Chia thưởng 15% lợi nhuận tổng cho 24 tầng`,
+      description: `Chia thưởng 10% lợi nhuận từ ${allPoints} điểm`,
       createdAt: new Date(),
     });
 

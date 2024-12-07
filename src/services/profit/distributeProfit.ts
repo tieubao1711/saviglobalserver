@@ -1,5 +1,5 @@
 import { sharePerPoint } from './sharePerPoint';
-import { sharePerLevel } from './sharePerLevel';
+import { sharePerLevel2 } from './sharePerLevel2';
 import { sharePerSAVI } from './sharePerSAVI';
 import { profitForAgency } from './sharePerAgency';
 import { distributeUplineProfit } from './sharePerUpline'; // Import hàm chia tuyến trên
@@ -26,7 +26,7 @@ export const distributeProfit = async () => {
 
     // Gọi các hàm phân phối và thu thập lợi nhuận từng user
     const pointProfits = await sharePerPoint(profitForPoints);
-    const levelProfits = await sharePerLevel(profitForLevels);
+    const levelProfits = await sharePerLevel2(profitForLevels);
     const saviProfits = await sharePerSAVI(profitForSAVIs);
     const agencyProfits = await profitForAgency(profitForAgencies);
 
