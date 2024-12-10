@@ -11,10 +11,20 @@ export const sharePerSAVI = async (profit: number): Promise<Record<string, numbe
     "SAVI 6": { ids: 1000, percent: 1 },
   };
 
+  // Tính tổng phần trăm cho từng rank (tích lũy từ rank thấp hơn)
+  const ranks = Object.entries(rankDistribution);
+  let cumulativePercent = 0;
+  let cumulativeRankDistribution: Record<string, number> = {};
+
+  for (const [rank, { percent }] of ranks) {
+    cumulativePercent += percent;
+    cumulativeRankDistribution[rank] = cumulativePercent;
+  }
+
   const rankProfits: Record<string, number> = {};
 
-  for (const [rank, { percent }] of Object.entries(rankDistribution)) {
-    const rankProfit = (profit * percent) / 100;
+  for (const [rank, cumulativePercent] of Object.entries(cumulativeRankDistribution)) {
+    const rankProfit = (profit * cumulativePercent) / 100;
 
     // Lấy danh sách người dùng theo rank
     const users = await User.find({ rank }).select("_id").lean();
@@ -35,7 +45,7 @@ export const sharePerSAVI = async (profit: number): Promise<Record<string, numbe
         userId: user._id,
         type: "thưởng",
         amount: profitPerUser,
-        description: `Chia thưởng ${percent}% lợi nhuận từ rank ${rank}`,
+        description: `Chia thưởng ${cumulativePercent}% lợi nhuận từ rank ${rank}`,
         createdAt: new Date(),
       });
 

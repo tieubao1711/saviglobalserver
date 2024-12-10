@@ -32,7 +32,7 @@ export const sharePerPoint = async (profit: number): Promise<Record<string, numb
       userId: user._id,
       type: "thưởng",
       amount: userShare,
-      description: `Chia thưởng 15% lợi nhuận tổng cho 24 tầng`,
+      description: `Đồng chia 10% lợi nhuận cho ${userPoints.length} ID`,
       createdAt: new Date(),
     });
 

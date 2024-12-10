@@ -5,6 +5,8 @@ import { profitForAgency } from './sharePerAgency';
 import { distributeUplineProfit } from './sharePerUpline'; // Import hàm chia tuyến trên
 import { CompanyWallet } from '../../models/CompanyWallet';
 import User from '../../models/User';
+import { log } from 'console';
+import { distributeDownlineProfit } from './sharePerDownline';
 
 export const distributeProfit = async () => {
   try {
@@ -14,21 +16,21 @@ export const distributeProfit = async () => {
       return;
     }
 
-    const profit = companyWallet.sharedWallet;
+    const profit = companyWallet.profitWallet;
 
     console.log(`Total profit for the day: ${profit}`);
 
     // Chia lợi nhuận
     const profitForPoints = profit * 0.1;
     const profitForLevels = profit * 0.15;
-    const profitForSAVIs = profit * 0.26;
-    const profitForAgencies = profit * 0.1;
+    const profitForDownline = profit * 0.1;
 
     // Gọi các hàm phân phối và thu thập lợi nhuận từng user
     const pointProfits = await sharePerPoint(profitForPoints);
     const levelProfits = await sharePerLevel2(profitForLevels);
-    const saviProfits = await sharePerSAVI(profitForSAVIs);
-    const agencyProfits = await profitForAgency(profitForAgencies);
+    const saviProfits = await sharePerSAVI(profit);
+    const agencyProfits = await profitForAgency(profit);
+    const downlineProfits = await distributeDownlineProfit(profitForDownline);
 
     // Hợp nhất lợi nhuận từ các nguồn
     const totalProfits: Record<string, number> = {};
@@ -43,6 +45,7 @@ export const distributeProfit = async () => {
     mergeProfits(levelProfits);
     mergeProfits(saviProfits);
     mergeProfits(agencyProfits);
+    mergeProfits(downlineProfits);
 
     // Cập nhật tổng lợi nhuận vào ví của user và lưu log
     for (const [userId, profit] of Object.entries(totalProfits)) {
@@ -50,7 +53,6 @@ export const distributeProfit = async () => {
         { _id: userId },
         { $inc: { "wallets.globalWallet": profit } }
       );
-      console.log(`User ${userId} received a total profit of ${profit}`);
     }
 
     // Phân phối lợi nhuận từ tuyến trên

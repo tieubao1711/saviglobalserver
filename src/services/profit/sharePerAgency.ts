@@ -4,9 +4,9 @@ import Transaction from "../../models/Transaction";
 
 export const profitForAgency = async (profit: number): Promise<Record<string, number>> => {
   const profitDistribution = {
-    3: 0.05, // Đại lý cấp 3: 5%
+    3: 0.02, // Đại lý cấp 3: 2%
     2: 0.03, // Đại lý cấp 2: 3%
-    1: 0.02, // Đại lý cấp 1: 2%
+    1: 0.05, // Đại lý cấp 1: 5%
   };
 
   const agencyProfits: Record<string, number> = {};

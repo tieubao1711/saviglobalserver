@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import { authenticate } from '../middlewares/authMiddleware';
 import { Point } from '../models/Point';
+import { fetch3Downline } from '../services/binarytree/get3Downline';
 
 const router = express.Router();
 
@@ -323,6 +324,49 @@ router.put('/update-rank', async (req: Request, res: Response) => {
     console.error('Error updating rank:', error);
     res.status(500).json({ status: 'error', message: 'Internal Server Error' });
   }
+});
+
+router.get('/3downline', authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id; // Lấy userId từ middleware authenticate
+  
+    if (!userId) {
+      res.status(401).json({ status: 'error', message: 'User not authenticated' });
+      return;
+    }
+  
+    // Tìm `Point` chứa `userId`
+    const point = await Point.findOne({ userId }).lean();
+  
+    if (!point) {
+      res.status(404).json({ status: 'error', message: 'Point not found for the given userId' });
+      return;
+    }
+  
+    // Tìm `BinaryTree` chứa `pointId`
+    const treeNode = await BinaryTree.findOne({ pointId: point._id }).lean();
+  
+    if (!treeNode) {
+      res.status(404).json({ status: 'error', message: 'BinaryTree node not found for the given userId' });
+      return;
+    }
+  
+    const currentNodeId = treeNode._id;
+  
+    if (!currentNodeId) {
+      res.status(400).json({ status: 'error', message: 'Invalid or missing node ID' });
+      return;
+    }
+  
+    // Lấy danh sách upline
+    const upline = await fetch3Downline(currentNodeId.toString());
+  
+    // Trả về kết quả
+    res.status(200).json({ status: 'success', data: upline });
+  } catch (error) {
+    console.error('Error fetching upline:', error);
+    res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+  }   
 });
 
 export default router;

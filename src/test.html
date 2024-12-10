@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Tree with 130 Nodes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+    .tree {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px;
+    }
+    .node {
+      display: inline-block;
+      padding: 10px;
+      border-radius: 50%;
+      background-color: #ddd;
+      margin: 5px;
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      font-weight: bold;
+      position: relative;
+    }
+    .level {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .node::before, .node::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      width: 1px;
+      height: 20px;
+      background: #000;
+    }
+    .node::before {
+      left: -25px;
+    }
+    .node::after {
+      right: -25px;
+    }
+    .node:first-child::before {
+      display: none;
+    }
+    .node:last-child::after {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Binary Tree with 130 Nodes</h1>
+  <div class="tree" id="tree"></div>
+
+  <script>
+    function createBinaryTree(numNodes) {
+      const treeContainer = document.getElementById('tree');
+      let currentNode = 1;
+      let level = 1;
+
+      while (currentNode <= numNodes) {
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'level';
+
+        for (let i = 0; i < Math.pow(2, level - 1) && currentNode <= numNodes; i++) {
+          const nodeDiv = document.createElement('div');
+          nodeDiv.className = 'node';
+          nodeDiv.textContent = `User${currentNode}`;
+          levelDiv.appendChild(nodeDiv);
+          currentNode++;
+        }
+
+        treeContainer.appendChild(levelDiv);
+        level++;
+      }
+    }
+
+    createBinaryTree(130);
+  </script>
+</body>
+</html>
