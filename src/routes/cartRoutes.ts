@@ -82,7 +82,7 @@ router.get('/carts', authenticate, async (req: Request, res: Response): Promise<
 
 
         if (!cart) {
-            res.status(404).json({ status: 'error', message: 'Cart not found' });
+            res.status(404).json({ status: 'success', data: [] });
             return;
         }
 
