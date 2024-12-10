@@ -68,7 +68,7 @@ app.listen(PORT, () => {
 
 // initialize base data
 initData();
-// updateRanksForAllUsers();
-// updateWalletsForAllUsers();
+updateRanksForAllUsers();
+updateWalletsForAllUsers();
 // updateAgencyForAllUsers();
 // getRankStatistics();

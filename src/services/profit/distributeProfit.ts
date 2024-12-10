@@ -49,6 +49,8 @@ export const distributeProfit = async () => {
 
     // Cập nhật tổng lợi nhuận vào ví của user và lưu log
     for (const [userId, profit] of Object.entries(totalProfits)) {
+      let user = await User.findById(userId);
+      console.log(`>>> ${user?.username} tổng lợi nhuận: ${profit}`);
       await User.updateOne(
         { _id: userId },
         { $inc: { "wallets.globalWallet": profit } }

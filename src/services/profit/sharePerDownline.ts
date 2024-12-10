@@ -46,39 +46,51 @@ export const distributeDownlineProfit = async (profit: number): Promise<Record<s
       // Lấy 3 tầng dưới của người dùng
       const downlines = await fetch3Downline(treeNode._id.toString());
 
+      // Gộp lợi nhuận theo level
+      const profitByLevel: Record<number, number> = {};
+
+      downlines.forEach((downline) => {
+        if (!downline || !downline.user || downline.level > percentages.length) {
+          console.log(`Invalid downline data for user ${user._id}.`);
+          return;
+        }
+
+        const downlineProfit = profitPerPoint * percentages[downline.level - 1];
+
+        if (downlineProfit <= 0) {
+          console.log(`No profit to distribute for downline ${downline?.user?.username || "unknown"}.`);
+          return;
+        }
+
+        // Gộp lợi nhuận theo level
+        profitByLevel[downline.level] = (profitByLevel[downline.level] || 0) + downlineProfit;
+      });
+
+      // Cập nhật ví và lưu lịch sử giao dịch cho từng level
       await Promise.all(
-        downlines.map(async (downline, i) => {
-            if (!downline || !downline.user || downline.level > percentages.length) {
-                console.log(`Invalid downline data for user ${user._id}.`);
-                return;
-            }
+        Object.entries(profitByLevel).map(async ([level, totalProfit]) => {
+          const levelIndex = parseInt(level, 10);
+          const percentage = percentages[levelIndex - 1] * 100;
 
-            const downlineProfit = profitPerPoint * percentages[downline.level - 1];
+          // Cập nhật ví của user
+          await User.updateOne(
+            { _id: user._id },
+            { $inc: { "wallets.globalWallet": totalProfit } }
+          );
 
-            if (downlineProfit <= 0) {
-                console.log(`No profit to distribute for downline ${downline?.user?.username || "unknown"}.`);
-                return;
-            }
+          // Lưu lịch sử giao dịch
+          const transaction = new Transaction({
+            userId: user._id,
+            type: "thưởng",
+            amount: totalProfit,
+            description: `Nhận ${percentage}% từ lợi nhuận tuyến dưới F${level}`,
+            createdAt: new Date(),
+          });
 
-            // Cập nhật ví của downline
-            await User.updateOne(
-                { _id: user._id },
-                { $inc: { "wallets.globalWallet": downlineProfit } }
-            );
+          await transaction.save();
 
-            // Lưu lịch sử giao dịch
-            const transaction = new Transaction({
-                userId: user._id,
-                type: "thưởng",
-                amount: downlineProfit,
-                description: `Nhận ${percentages[downline.level - 1] * 100}% từ lợi nhuận tuyến dưới ${i + 1} của ${downline.user.username}`,
-                createdAt: new Date(),
-            });
-
-            await transaction.save();
-
-            // Cập nhật lợi nhuận hôm nay của downline
-            userProfits[user._id] = (userProfits[user._id] || 0) + downlineProfit;
+          // Cập nhật lợi nhuận hôm nay của user
+          userProfits[user._id] = (userProfits[user._id] || 0) + totalProfit;
         })
       );
     }
